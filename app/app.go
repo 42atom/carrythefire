@@ -11,15 +11,11 @@ import (
 func Start(src, dst string) error {
 	//Check src is exists
 	if _, err := os.Stat(src); os.IsNotExist(err) {
-		return fmt.Errorf("source %s isn't exits, please check again", src)
+		return fmt.Errorf("source '%s' isn't exits, please check again", src)
 	}
 	//Check dst is exists,
 	if _, err := os.Stat(dst); os.IsNotExist(err) {
-		//Create if not exists
-		err := os.MkdirAll(dst, 0755)
-		if err != nil {
-			return err
-		}
+		return fmt.Errorf("target '%s' isn't exits, please check again", dst)
 	}
 	srcPlotFiles, err := getPlotFileIn(src)
 	if err != nil {
@@ -59,6 +55,11 @@ func Start(src, dst string) error {
 			return fmt.Errorf("src %s(%d) is not equal dst %s(%d)", source, fsize, target, tsize)
 		}
 		log.Printf("Successfully copy %s(%d) to %s(%d)\n", source, fsize, target, tsize)
+		err = delFile(source)
+		if err != nil {
+			return err
+		}
+		log.Printf("Delete source file: %s\n", source)
 	}
 	return nil
 }
@@ -105,4 +106,8 @@ func cpFile(src, dst string) (int64, error) {
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
+}
+
+func delFile(f string) error {
+	return os.Remove(f)
 }
