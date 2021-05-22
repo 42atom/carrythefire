@@ -13,10 +13,11 @@ import (
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "plotcarrier",
+	Use:   "plot-carrier",
 	Short: "Plot carrier move src plot file to dst",
 	Long: `Move src plot file to dst.
 Please use "plot-carrier start" to start the program`,
+	Version: "1.0.0",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
