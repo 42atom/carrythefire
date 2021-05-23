@@ -1,16 +1,33 @@
 # carrythefire
 files process manager
 
-# Usage
+# 使用说明
 
-Copy src plot files to dsk 
+## 基本用法
+
+复制源盘到目标盘
 
 ```
 plot-carrier start --src src_disk --dst target_disk -t 120
 ```
 
-`--src` spicify the src directory
+`--src` 源盘目录
 
-`--dst` spicify the target directory
+`--dst` 目标盘目录
 
-`-t or --interval` specify the interval of scanning
+`-t or --interval` 扫描间隔时间
+
+## 后台运行
+
+```
+nohup ./plot-carrier start --src test/src --dst test/dst -t 5 > plotcarrier.log &
+```
+
+`plotcarrier.log` 指定输出日志文件
+
+
+## 停止运行
+
+```
+pkill plot-carrier
+```
