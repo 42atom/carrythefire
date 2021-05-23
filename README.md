@@ -15,7 +15,7 @@ plot-carrier start --src src_disk --dst target_disk -t 120
 
 `--dst` 目标盘目录
 
-`-t or --interval` 扫描间隔时间
+`-t or --interval` 扫描间隔时间/s
 
 ## 后台运行
 
