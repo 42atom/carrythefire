@@ -22,7 +22,7 @@ plot-carrier start --src src_disk --dst target_disk -t 120 --config plot-carrier
 
 `--dst` 目标盘目录
 
-`-t or --interval` 扫描间隔时间
+`-t or --interval` 扫描间隔时间/s
 
 `--config` 配置文件路径
 
