@@ -1,0 +1,14 @@
+interval: 120 #Run interval
+warining_size: 505 # 505G
+pause_size: 100 # 100G
+alerty_type: email
+email:
+  host: smtp.xxx.com
+  port: 547
+  username: username
+  password: password
+  to:
+    - abc@xx.com
+    - cde@xx.com
+dingtalk:
+  url: https://oapi.dingtalk.com/robot/send?access_token=XXXXXX
