@@ -16,6 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"log"
+	"plotcarrier/service"
+
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +32,10 @@ Use this config file like this:
 nohup ./plot-carrier start --config path/to/config.yaml --src test/src --dst test/dst > plotcarrier.log &
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		err := service.InitConfig("plot-carrier.yaml")
+		if err != nil {
+			log.Println(err)
+		}
 	},
 }
 

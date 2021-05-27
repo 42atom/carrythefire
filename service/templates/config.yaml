@@ -1,7 +1,6 @@
-interval: 120 #Run interval
-warining_size: 505 # 505G
-pause_size: 100 # 100G
-alerty_type: email
+warining_size: 505 # 警告容量大小，单位：GB
+pause_size: 100 # 停止搬运程序大小，单位：GB
+alerty_type: email #通知类型，目前仅支持email和dingtalk
 email:
   host: smtp.xxx.com
   port: 547
