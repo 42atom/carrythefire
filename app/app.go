@@ -9,6 +9,15 @@ import (
 )
 
 func Start(src, dst string) error {
+	//Pause or Warning check
+	checkRes, err := pauseOrWarning(dst)
+	if !checkRes {
+		return err
+	}
+	if err != nil {
+		log.Println(err)
+	}
+
 	//Check src is exists
 	if _, err := os.Stat(src); os.IsNotExist(err) {
 		return fmt.Errorf("source '%s' isn't exits, please check again", src)
