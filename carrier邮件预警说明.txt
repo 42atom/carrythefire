@@ -1,0 +1,67 @@
+carrier 邮件预警功能设计说明:
+
+使carrier可以在搬运时提醒管理员磁盘可用情况,并在管理员久未操作时介入;
+
+首先生成默认配置及数值
+./config/plotcarrier/
+plotcarrier-mail.yaml
+
+# 设置任务执行间隔时间/s
+inteval:120
+# 设置可用空间警告,/Gib
+WaringSize: 505
+# 设置强制执行plotman suspend,/Gib
+PauseSize: 100
+# 设置邮件发送信息
+sender: 
+from: ...@qq.com
+smtp: smtp.qq.com  
+smtp-auth-user: ...
+smtp-auth-password: 123456
+smtp-auth: login  
+
+# 设置邮件接受者信息
+mail1 : .....@qq.com
+mail2 : .....@qq.com
+mail3 : 
+mail4 : 
+
+以上信息为默认配置,可以修改保存,每次程序启动重新读取
+
+
+运行逻辑:
+
+carrier搬运前做出计算:
+[dst*]都是目标盘
+先获取dst1,dst2的可用空间大小:
+再获取plotman status里的job id,用plotman details [job id] 获取该任务的dst位置信息
+
+开始计算:
+dst1 的job总数,dst2的job总数,
+如果
+k = 32,size = 101.4Gib
+K = 33,size = 208.8
+k = 34,size = 429.8
+K = 35,size = 884.1
+
+执行邮件-可用容量警告:
+将dst1的job数 x 相应的size得出“将使用空间”, 比较dst1的可用空间,如果可用空间小于将使用空间WaringSize(或可用空间小于505GiB), 则发送邮件,内容如下:
+  Title: [主机名称]的可用容量警告:
+  Content: dst1可用空间即将不足,请立即查看.
+
+如未达成条件,则不执行任何操作
+
+执行强制暂停并警告:
+如果可用空间小于PauseSize,执行:
+获取plotman status里的ids,将对应的dst的任务id获取,并分别执行plotman suspend [id]
+
+并发出邮件
+
+内容如下:
+  Title: 暂停任务警告,[主机名称]:
+  Content: dst1可用空间严重不足,已执行相关任务暂停操作,请在更换磁盘后再激活任务:
+	已暂停 [job id]
+         ....
+         ....
+
+

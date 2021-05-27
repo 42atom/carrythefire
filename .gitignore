@@ -27,7 +27,7 @@
 
 
 # project file
-config.yaml
+/config.yaml
 build
 dst
 src
