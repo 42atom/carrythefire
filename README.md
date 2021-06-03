@@ -15,21 +15,14 @@ plot-carrier init
 复制源盘到目标盘
 
 ```
-plot-carrier start --src src_disk --dst target_disk -t 120 --config plot-carrier.yaml
+plot-carrier remote --config plot-carrier.yaml
 ```
-
-`--src` 源盘目录
-
-`--dst` 目标盘目录
-
-`-t or --interval` 扫描间隔时间/s
-
 `--config` 配置文件路径
 
 ## 后台运行
 
 ```
-nohup ./plot-carrier start --src test/src --dst test/dst -t 120 --config plot-carrier.yaml > plotcarrier.log &
+nohup ./plot-carrier remote --config plot-carrier.yaml > plotcarrier.log &
 ```
 
 `plotcarrier.log` 指定输出日志文件
