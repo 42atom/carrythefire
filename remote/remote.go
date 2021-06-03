@@ -1,5 +1,7 @@
 package remote
 
+import "log"
+
 func StartSCP(ip, src, dst, hostUsername, hostKeypath string) error {
 	//Connect host
 	sshClient, err := connectSSH(ip, "22", hostUsername, hostKeypath)
@@ -11,6 +13,10 @@ func StartSCP(ip, src, dst, hostUsername, hostKeypath string) error {
 	plots, err := getPlots(sshClient, src)
 	if err != nil {
 		return err
+	}
+
+	if len(plots) == 0 {
+		log.Printf("There are no plots on %s, %s", ip, src)
 	}
 
 	//Start moving files

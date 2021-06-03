@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"plotcarrier/remote"
 	"time"
@@ -15,6 +16,11 @@ type MachineCfg struct {
 }
 
 func RemoteStart() error {
+	hostName := viper.GetString("host.username")
+	keyPath := viper.GetString("host.keypath")
+	if hostName == "" || keyPath == "" {
+		return fmt.Errorf("HostName or ssh priavate key path is empty")
+	}
 	machineCfgs := []*MachineCfg{}
 	err := viper.UnmarshalKey("machines", &machineCfgs)
 	if err != nil {
@@ -28,12 +34,12 @@ func RemoteStart() error {
 
 	//Start worker
 	for i := 0; i < workerNum; i++ {
-		go worker(i, machine)
+		go worker(i, hostName, keyPath, machine)
 	}
 
 	for {
 		if count > mtotal-1 {
-			log.Println("Already finish a round")
+			log.Printf("Already finish a round, sleep %d second", interval)
 			time.Sleep(time.Duration(interval) * time.Second)
 			count = 0
 		}
@@ -42,13 +48,11 @@ func RemoteStart() error {
 	}
 }
 
-func worker(id int, machine <-chan *MachineCfg) {
+func worker(id int, hostname, keypath string, machine <-chan *MachineCfg) {
 	log.Printf("Start worker_%d\n", id)
 	for m := range machine {
 		log.Printf("Worker_%d, start job. ip: %s, src: %s, dst: %s\n", id, m.IP, m.Src, m.Dst)
-		//r := rand.Intn(10)
-		//time.Sleep(time.Duration(r) * time.Second)
-		err := remote.MV(m.IP, m.Src, m.Dst)
+		err := remote.StartSCP(m.IP, m.Src, m.Dst, hostname, keypath)
 		if err != nil {
 			log.Printf("Move file error: %s", err)
 		}

@@ -64,10 +64,20 @@ func copy(sshClient *ssh.Client, src, filename, dst string, size int64) (int64, 
 		}
 	}
 
+	//TODO: Disk alert
+
 	now := time.Now()
 	scpClient, err := newSCPClient(sshClient)
 	if err != nil {
 		return 0, nil
+	}
+
+	//Creat dst folder if not exists
+	if _, err := os.Stat(dst); os.IsNotExist(err) {
+		err := os.Mkdir(dst, 0777)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	dstFile, err := os.Create(dstPath)
