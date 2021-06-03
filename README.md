@@ -33,3 +33,9 @@ nohup ./plot-carrier remote --config plot-carrier.yaml > plotcarrier.log &
 ```
 pkill plot-carrier
 ```
+
+## 查看当前版本
+
+```
+plot-carrier --version
+```

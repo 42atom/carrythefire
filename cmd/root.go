@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 	Short: "Plot carrier move src plot file to dst",
 	Long: `Move src plot file to dst.
 Please use "plot-carrier start" to start the program`,
-	Version: "2.0.0",
+	Version: "3.0.0",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
