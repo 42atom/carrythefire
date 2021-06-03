@@ -19,8 +19,8 @@ func TestStartSCP(t *testing.T) {
 	}{
 		{"test", args{
 			ip:           "192.168.33.6",
-			src:          "/home/project",
-			dst:          "/home/project",
+			src:          "/home/vagrant/test",
+			dst:          "../dst",
 			hostUsername: "vagrant",
 			hostKeypath:  "/Users/jimwang/.ssh/id_rsa",
 		}, false},
