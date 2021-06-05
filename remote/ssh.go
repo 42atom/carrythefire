@@ -24,6 +24,7 @@ func connectSSH(ip, port, username, keypath string) (*ssh.Client, error) {
 
 func newSCPClient(sshClient *ssh.Client) (*scp.Client, error) {
 	client, err := scp.NewClientBySSH(sshClient)
+	client.Timeout = time.Hour
 	if err != nil {
 		return nil, err
 	}

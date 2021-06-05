@@ -10,9 +10,10 @@ import (
 )
 
 type MachineCfg struct {
-	IP  string `yaml:"ip"`
-	Src string `yaml:"remote_src"`
-	Dst string `yaml:"local_dst"`
+	IP          string `yaml:"ip"`
+	BindAddress string `yaml:"bindAddress"`
+	Src         string `yaml:"remote_src"`
+	Dst         string `yaml:"local_dst"`
 }
 
 func RemoteStart() error {
@@ -52,9 +53,10 @@ func worker(id int, hostname, keypath string, machine <-chan *MachineCfg) {
 	log.Printf("Start worker_%d\n", id)
 	for m := range machine {
 		log.Printf("Worker_%d, start job. ip: %s, src: %s, dst: %s\n", id, m.IP, m.Src, m.Dst)
-		err := remote.StartSCP(m.IP, m.Src, m.Dst, hostname, keypath)
+		//err := remote.StartSCP(m.IP, m.Src, m.Dst, hostname, keypath)
+		err := remote.StartSCPSimple(m.IP, m.BindAddress, m.Src, m.Dst, hostname, keypath)
 		if err != nil {
-			log.Printf("Move file error: %s", err)
+			log.Printf("Worker_%d, Move file error: %s", id, err)
 		}
 		log.Printf("Worker_%d, finish job. ip: %s, src: %s, dst: %s\n", id, m.IP, m.Src, m.Dst)
 	}
