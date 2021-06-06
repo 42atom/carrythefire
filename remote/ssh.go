@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func connectSSH(ip, port, username, keypath string) (*ssh.Client, error) {
+func ConnectSSH(ip, port, username, keypath string) (*ssh.Client, error) {
 
 	// Use SSH key authentication from the auth package
 	// we ignore the host key in this example, please change this if you use this library

@@ -20,13 +20,13 @@ type Task struct {
 
 func StartSCP(ip, bindAddress, src, dst, hostUsername, hostKeypath string) error {
 	//Connect host
-	sshClient, err := connectSSH(ip, "22", hostUsername, hostKeypath)
+	sshClient, err := ConnectSSH(ip, "22", hostUsername, hostKeypath)
 	if err != nil {
 		return err
 	}
 
 	//Fetch plots
-	plots, err := getPlots(sshClient, src)
+	plots, err := GetPlots(sshClient, src)
 	if err != nil {
 		return err
 	}
@@ -48,13 +48,13 @@ func StartSCP(ip, bindAddress, src, dst, hostUsername, hostKeypath string) error
 
 func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string, workerNum int) error {
 	//Connect host
-	sshClient, err := connectSSH(ip, "22", hostUsername, hostKeypath)
+	sshClient, err := ConnectSSH(ip, "22", hostUsername, hostKeypath)
 	if err != nil {
 		return err
 	}
 
 	//Fetch plots
-	plots, err := getPlots(sshClient, src)
+	plots, err := GetPlots(sshClient, src)
 	if err != nil {
 		return err
 	}

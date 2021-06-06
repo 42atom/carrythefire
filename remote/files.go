@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func getPlots(sshClient *ssh.Client, src string) (map[string]int64, error) {
+func GetPlots(sshClient *ssh.Client, src string) (map[string]int64, error) {
 	client, err := sftp.NewClient(sshClient)
 	if err != nil {
 		return nil, err

@@ -22,11 +22,11 @@ func Test_getPlots(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sclient, err := connectSSH("192.168.33.6", "22", "vagrant", "/Users/jimwang/.ssh/id_rsa")
+			sclient, err := ConnectSSH("192.168.33.6", "22", "vagrant", "/Users/jimwang/.ssh/id_rsa")
 			if err != nil {
 				t.Fatalf(err.Error())
 			}
-			got, err := getPlots(sclient, tt.args.src)
+			got, err := GetPlots(sclient, tt.args.src)
 			assert.NotNil(t, got)
 			assert.Nil(t, err)
 		})

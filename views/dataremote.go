@@ -5,12 +5,37 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"plotcarrier/app"
+	"plotcarrier/remote"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
 
-func fetchRemotePlots() []string {
-	return fetchFromHttp("remote-plots")
+func fetchRemotePlots(hostName, keyPath string, machineCfgs []*app.MachineCfg, plotsMap map[string]map[string]int64) [][]string {
+	res := [][]string{
+		{"ip", "src", "count"},
+	}
+
+	for _, mcfg := range machineCfgs {
+		//Connect host
+		sshClient, err := remote.ConnectSSH(mcfg.IP, "22", hostName, keyPath)
+		if err != nil {
+			res = append(res, []string{err.Error()})
+			return res
+		}
+
+		//Fetch plots
+		plots, err := remote.GetPlots(sshClient, mcfg.Src)
+		if err != nil {
+			res = append(res, []string{err.Error()})
+			return res
+		}
+		plotsMap[mcfg.IP] = plots
+		res = append(res, []string{mcfg.IP, mcfg.Src, strconv.FormatInt(int64(len(plots)), 10)})
+	}
+
+	return res
 }
 
 func fetchFromHttp(uri string) []string {
