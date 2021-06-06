@@ -1,5 +1,8 @@
 interval: 120 #每完成一轮（所有机器）后，间隔（休息）秒数
 worker: 2 #并行执行的任务数
+bindAddress: #需要绑定网卡的IP。如果只有一张网卡，请注释掉此配置
+  - 192.168.1.103
+  - 192.168.1.104
 host:
   username: chiadmin #远程机器的登陆用户名
   keypath: /path/to/local/user/.ssh/id_rsa #本机私钥的绝对地址

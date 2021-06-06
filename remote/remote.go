@@ -1,6 +1,22 @@
 package remote
 
-import "log"
+import (
+	"log"
+	"sync"
+
+	"golang.org/x/crypto/ssh"
+)
+
+type Task struct {
+	Client       *ssh.Client
+	IP           string
+	HostUserName string
+	BindAddress  string
+	Src          string
+	FileName     string
+	Dst          string
+	Size         int64
+}
 
 func StartSCP(ip, bindAddress, src, dst, hostUsername, hostKeypath string) error {
 	//Connect host
@@ -30,7 +46,7 @@ func StartSCP(ip, bindAddress, src, dst, hostUsername, hostKeypath string) error
 	return nil
 }
 
-func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string) error {
+func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string, workerNum int) error {
 	//Connect host
 	sshClient, err := connectSSH(ip, "22", hostUsername, hostKeypath)
 	if err != nil {
@@ -46,13 +62,35 @@ func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string)
 	if len(plots) == 0 {
 		log.Printf("There are no plots on %s, %s", ip, src)
 	}
+
+	//Start worker
+	var wg sync.WaitGroup
+	taskChanel := make(chan *Task, workerNum)
+	for i := 0; i < workerNum; i++ {
+		wg.Add(1)
+		go func(index int) {
+			for t := range taskChanel {
+				simpleMV(t.Client, t.IP, t.HostUserName, t.BindAddress, t.Src, t.FileName, t.Dst, t.Size)
+			}
+			wg.Done()
+		}(i)
+	}
 	//Start moving files
 	for filename, size := range plots {
-		err := simpleMV(sshClient, ip, hostUsername, bindAddress, src, filename, dst, size)
-		if err != nil {
-			return err
+		t := &Task{
+			Client:       sshClient,
+			IP:           ip,
+			HostUserName: hostUsername,
+			BindAddress:  bindAddress,
+			Src:          src,
+			FileName:     filename,
+			Dst:          dst,
+			Size:         size,
 		}
+		taskChanel <- t
 	}
+	close(taskChanel)
+	wg.Wait()
 
 	return nil
 }

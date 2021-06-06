@@ -43,6 +43,7 @@ func TestStartSCPSimple(t *testing.T) {
 		dst          string
 		hostUsername string
 		hostKeypath  string
+		workerNum    int
 	}
 	tests := []struct {
 		name    string
@@ -56,11 +57,12 @@ func TestStartSCPSimple(t *testing.T) {
 			dst:          "../dst",
 			hostUsername: "vagrant",
 			hostKeypath:  "/Users/jimwang/.ssh/id_rsa",
+			workerNum:    2,
 		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := StartSCPSimple(tt.args.ip, tt.args.bindAddress, tt.args.src, tt.args.dst, tt.args.hostUsername, tt.args.hostKeypath); (err != nil) != tt.wantErr {
+			if err := StartSCPSimple(tt.args.ip, tt.args.bindAddress, tt.args.src, tt.args.dst, tt.args.hostUsername, tt.args.hostKeypath, tt.args.workerNum); (err != nil) != tt.wantErr {
 				t.Errorf("StartSCPSimple() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

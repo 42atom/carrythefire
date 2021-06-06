@@ -30,18 +30,30 @@ func RemoteStart() error {
 	interval := viper.GetInt("interval")
 	count := 0
 	mtotal := len(machineCfgs)
-	workerNum := viper.GetInt("worker")
+	bindAddress := viper.GetStringSlice("bindAddress")
+	if len(bindAddress) == 0 {
+		bindAddress = []string{""}
+	}
+	workerNum := len(bindAddress)
 	machine := make(chan *MachineCfg, workerNum)
+
+	carrierWorker := viper.GetInt("worker")
+	if carrierWorker <= 0 {
+		log.Println("Woker doesn't set, default is 0")
+		carrierWorker = 1
+	}
+	if carrierWorker > 8 {
+		log.Println("Woker larger than 8, default is 8")
+		carrierWorker = 8
+	}
 
 	//Start worker
 	for i := 0; i < workerNum; i++ {
-		go worker(i, hostName, keyPath, machine)
+		go worker(i, hostName, keyPath, interval, bindAddress, machine, carrierWorker)
 	}
 
 	for {
 		if count > mtotal-1 {
-			log.Printf("Already finish a round, sleep %d second", interval)
-			time.Sleep(time.Duration(interval) * time.Second)
 			count = 0
 		}
 		machine <- machineCfgs[count]
@@ -49,16 +61,18 @@ func RemoteStart() error {
 	}
 }
 
-func worker(id int, hostname, keypath string, machine <-chan *MachineCfg) {
-	log.Printf("Start worker_%d\n", id)
+func worker(id int, hostname, keypath string, interval int, bindAddress []string, machine <-chan *MachineCfg, carrierWorker int) {
+	log.Printf("Start from network interface: %d\n", id)
 	for m := range machine {
-		log.Printf("Worker_%d, start job. ip: %s, src: %s, dst: %s\n", id, m.IP, m.Src, m.Dst)
-		//err := remote.StartSCP(m.IP, m.Src, m.Dst, hostname, keypath)
-		err := remote.StartSCPSimple(m.IP, m.BindAddress, m.Src, m.Dst, hostname, keypath)
+		currentBindAddress := bindAddress[id]
+		log.Printf("Network interface: %d, start job. ip: %s, bindAddress: %s, src: %s, dst: %s\n", id, m.IP, currentBindAddress, m.Src, m.Dst)
+		// r := rand.Intn(20)
+		// time.Sleep(time.Duration(r) * time.Second)
+		err := remote.StartSCPSimple(m.IP, currentBindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
 		if err != nil {
 			log.Printf("Worker_%d, Move file error: %s", id, err)
 		}
-		log.Printf("Worker_%d, finish job. ip: %s, src: %s, dst: %s\n", id, m.IP, m.Src, m.Dst)
+		log.Printf("Network interface: %d, finish job. ip: %s, bindAddress: %s, src: %s, dst: %s, sleep %d second\n", id, m.IP, currentBindAddress, m.Src, m.Dst, interval)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
-	log.Printf("End worker_%d\n", id)
 }
