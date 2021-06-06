@@ -10,10 +10,9 @@ import (
 )
 
 type MachineCfg struct {
-	IP          string `yaml:"ip"`
-	BindAddress string `yaml:"bindAddress"`
-	Src         string `yaml:"remote_src"`
-	Dst         string `yaml:"local_dst"`
+	IP  string `yaml:"ip"`
+	Src string `yaml:"remote_src"`
+	Dst string `yaml:"local_dst"`
 }
 
 func RemoteStart() error {
