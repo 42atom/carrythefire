@@ -14,8 +14,8 @@ func Test_fetchDisk(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, machineCfgs := parseConfig()
-			if got := fetchDisk(machineCfgs); !reflect.DeepEqual(got, tt.want) {
+			_, _, targets := parseConfig()
+			if got := fetchDisk(targets); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("fetchDisk() = %v, want %v", got, tt.want)
 			}
 		})

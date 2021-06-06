@@ -24,7 +24,7 @@ func Run() {
 		log.Fatalln("Config file not found")
 	}
 
-	hostName, keyPath, machineCfgs := parseConfig()
+	hostName, keyPath, targets := parseConfig()
 
 	//Start UI
 	if err := ui.Init(); err != nil {
@@ -35,7 +35,7 @@ func Run() {
 	v := NewView()
 	grid := v.SetLayout()
 
-	v.Update(hostName, keyPath, machineCfgs)
+	v.Update(hostName, keyPath, targets)
 
 	ui.Render(grid)
 	uiEvents := ui.PollEvents()
@@ -68,8 +68,9 @@ func NewView() *View {
 	v.Process.ColumnResizer = func() {
 		if len(v.Process.Rows) > 0 {
 			//Three column
-			edgeSize := (v.Process.Inner.Dx() / 10) * 2
-			middleSize := (v.Process.Inner.Dx() / 10) * 6
+			edgeSize := (v.Process.Inner.Dx() / 20) * 2
+			middleSize := (v.Process.Inner.Dx() / 20) * 14
+			v.Process.ColumnWidths = append(v.Process.ColumnWidths, edgeSize)
 			v.Process.ColumnWidths = append(v.Process.ColumnWidths, edgeSize)
 			v.Process.ColumnWidths = append(v.Process.ColumnWidths, middleSize)
 			v.Process.ColumnWidths = append(v.Process.ColumnWidths, edgeSize)
@@ -96,42 +97,42 @@ func (v *View) SetLayout() *ui.Grid {
 	return grid
 }
 
-func (v *View) Update(hostName, keyPath string, machineCfgs []*app.MachineCfg) {
+func (v *View) Update(hostName, keyPath string, targets []*app.Target) {
 	plotsMap := map[string]map[string]int64{}
 
 	//Fetch remote plots
-	v.RemotePlot.Rows = fetchRemotePlots(hostName, keyPath, machineCfgs, plotsMap)
+	v.RemotePlot.Rows = fetchRemotePlots(hostName, keyPath, targets, plotsMap)
 	//Fetch disk usage
-	v.DiskUage.Rows = fetchDisk(machineCfgs)
-	v.Process.Rows = fetchProcess(plotsMap, machineCfgs)
+	v.DiskUage.Rows = fetchDisk(targets)
+	v.Process.Rows = fetchProcess(plotsMap, targets)
 
 	remoteUpdateInterval := 1 * time.Minute
 	go func() {
 		for range time.NewTicker(remoteUpdateInterval).C {
 			//Fetch remote plots
-			v.RemotePlot.Rows = fetchRemotePlots(hostName, keyPath, machineCfgs, plotsMap)
+			v.RemotePlot.Rows = fetchRemotePlots(hostName, keyPath, targets, plotsMap)
 			//Fetch disk usage
-			v.DiskUage.Rows = fetchDisk(machineCfgs)
+			v.DiskUage.Rows = fetchDisk(targets)
 		}
 	}()
 
-	pInterval := 5 * time.Second
+	pInterval := 1 * time.Second
 	go func() {
 		for range time.NewTicker(pInterval).C {
 			//Fetch process
-			v.Process.Rows = fetchProcess(plotsMap, machineCfgs)
+			v.Process.Rows = fetchProcess(plotsMap, targets)
 		}
 	}()
 }
 
-func parseConfig() (string, string, []*app.MachineCfg) {
+func parseConfig() (string, string, []*app.Target) {
 	hostName := viper.GetString("host.username")
 	keyPath := viper.GetString("host.keypath")
 
-	machineCfgs := []*app.MachineCfg{}
-	err := viper.UnmarshalKey("machines", &machineCfgs)
+	targets := []*app.Target{}
+	err := viper.UnmarshalKey("targets", &targets)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	return hostName, keyPath, machineCfgs
+	return hostName, keyPath, targets
 }

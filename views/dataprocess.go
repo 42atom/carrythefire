@@ -8,18 +8,23 @@ import (
 )
 
 type process struct {
-	ip       string
-	fileName string
-	percent  uint
+	bindAddress string
+	ip          string
+	fileName    string
+	percent     uint
 }
 
-func fetchProcess(plotsMap map[string]map[string]int64, machineCfgs []*app.MachineCfg) [][]string {
+func fetchProcess(plotsMap map[string]map[string]int64, targets []*app.Target) [][]string {
 	res := [][]string{
-		{"ip", "filename", "percent"},
+		{"bind address", "ip", "filename", "percent"},
 	}
+	bindMap := map[string]string{}
 	localMap := map[string]string{}
-	for _, cfg := range machineCfgs {
-		localMap[cfg.IP] = cfg.Dst
+	for _, v := range targets {
+		for _, m := range v.MachineCfgs {
+			bindMap[m.IP] = v.BindAddress
+			localMap[m.IP] = m.Dst
+		}
 	}
 	processes := []*process{}
 	for ip, plots := range plotsMap {
@@ -28,6 +33,7 @@ func fetchProcess(plotsMap map[string]map[string]int64, machineCfgs []*app.Machi
 			dstPath := fmt.Sprintf("%s/%s", dst, filename)
 			finfo, err := os.Stat(dstPath)
 			p := &process{}
+			p.bindAddress = bindMap[ip]
 			p.ip = ip
 			p.fileName = filename
 			if err != nil {
@@ -47,7 +53,7 @@ func fetchProcess(plotsMap map[string]map[string]int64, machineCfgs []*app.Machi
 
 	for _, v := range processes {
 		res = append(res, []string{
-			v.ip, v.fileName, fmt.Sprintf("%v %%", v.percent),
+			v.bindAddress, v.ip, v.fileName, fmt.Sprintf("%v %%", v.percent),
 		})
 	}
 

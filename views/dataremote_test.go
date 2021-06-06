@@ -25,8 +25,8 @@ func Test_fetchRemotePlots(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hostName, keyPath, machineCfgs := parseConfig()
-			if got := fetchRemotePlots(hostName, keyPath, machineCfgs, map[string]map[string]int64{}); !reflect.DeepEqual(got, tt.want) {
+			hostName, keyPath, targets := parseConfig()
+			if got := fetchRemotePlots(hostName, keyPath, targets, map[string]map[string]int64{}); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("fetchRemotePlots() = %v, want %v", got, tt.want)
 			}
 		})

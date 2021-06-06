@@ -12,9 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func fetchRemotePlots(hostName, keyPath string, machineCfgs []*app.MachineCfg, plotsMap map[string]map[string]int64) [][]string {
+func fetchRemotePlots(hostName, keyPath string, targets []*app.Target, plotsMap map[string]map[string]int64) [][]string {
 	res := [][]string{
 		{"ip", "src", "count"},
+	}
+
+	machineCfgs := []*app.MachineCfg{}
+	for _, v := range targets {
+		machineCfgs = append(machineCfgs, v.MachineCfgs...)
 	}
 
 	for _, mcfg := range machineCfgs {
