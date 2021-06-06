@@ -2,7 +2,6 @@ package remote
 
 import (
 	"log"
-	"sync"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -62,20 +61,8 @@ func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string,
 	if len(plots) == 0 {
 		log.Printf("There are no plots on %s, %s", ip, src)
 	}
-
-	//Start worker
-	var wg sync.WaitGroup
-	taskChanel := make(chan *Task, workerNum)
-	for i := 0; i < workerNum; i++ {
-		wg.Add(1)
-		go func(index int) {
-			for t := range taskChanel {
-				simpleMV(t.Client, t.IP, t.HostUserName, t.BindAddress, t.Src, t.FileName, t.Dst, t.Size)
-			}
-			wg.Done()
-		}(i)
-	}
-	//Start moving files
+	//Change to slice
+	pp := []*Task{}
 	for filename, size := range plots {
 		t := &Task{
 			Client:       sshClient,
@@ -87,10 +74,9 @@ func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string,
 			Dst:          dst,
 			Size:         size,
 		}
-		taskChanel <- t
+		pp = append(pp, t)
 	}
-	close(taskChanel)
-	wg.Wait()
 
-	return nil
+	t := pp[0]
+	return simpleMV(t.Client, t.IP, t.HostUserName, t.BindAddress, t.Src, t.FileName, t.Dst, t.Size)
 }

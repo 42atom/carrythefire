@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"log"
 	"plotcarrier/remote"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
 )
+
+type Target struct {
+	BindAddress string        `yaml:"bindAddress"`
+	MachineCfgs []*MachineCfg `mapstructure:"machines"`
+}
 
 type MachineCfg struct {
 	IP  string `yaml:"ip"`
@@ -21,57 +27,59 @@ func RemoteStart() error {
 	if hostName == "" || keyPath == "" {
 		return fmt.Errorf("HostName or ssh priavate key path is empty")
 	}
-	machineCfgs := []*MachineCfg{}
-	err := viper.UnmarshalKey("machines", &machineCfgs)
+	targets := []*Target{}
+	err := viper.UnmarshalKey("targets", &targets)
 	if err != nil {
 		return err
 	}
 	interval := viper.GetInt("interval")
-	count := 0
-	mtotal := len(machineCfgs)
-	bindAddress := viper.GetStringSlice("bindAddress")
-	if len(bindAddress) == 0 {
-		bindAddress = []string{""}
-	}
-	workerNum := len(bindAddress)
-	machine := make(chan *MachineCfg, workerNum)
 
+	var wg *sync.WaitGroup
 	carrierWorker := viper.GetInt("worker")
-	if carrierWorker <= 0 {
-		log.Println("Woker doesn't set, default is 0")
-		carrierWorker = 1
+	for _, v := range targets {
+		wg.Add(1)
+		go distributeByBindAddress(v.MachineCfgs, v.BindAddress, hostName, keyPath, interval, carrierWorker)
 	}
+	wg.Wait()
+
+	return nil
+}
+
+func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath string, interval, carrierWorker int) {
+	//Maximum 8 workers for each bindAddress
 	if carrierWorker > 8 {
-		log.Println("Woker larger than 8, default is 8")
 		carrierWorker = 8
 	}
 
+	count := 0
+	mtotal := len(cfgs)
+	machine := make(chan *MachineCfg, carrierWorker)
+
 	//Start worker
-	for i := 0; i < workerNum; i++ {
-		go worker(i, hostName, keyPath, interval, bindAddress, machine, carrierWorker)
+	for i := 0; i < carrierWorker; i++ {
+		go worker(i, bindAddress, hostName, keyPath, interval, machine, carrierWorker)
 	}
 
 	for {
 		if count > mtotal-1 {
 			count = 0
 		}
-		machine <- machineCfgs[count]
+		machine <- cfgs[count]
 		count++
 	}
 }
 
-func worker(id int, hostname, keypath string, interval int, bindAddress []string, machine <-chan *MachineCfg, carrierWorker int) {
-	log.Printf("Start from network interface: %d\n", id)
+func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int) {
+	log.Printf("BindAddress %s, start worker: %d\n", bindAddress, id)
 	for m := range machine {
-		currentBindAddress := bindAddress[id]
-		log.Printf("Network interface: %d, start job. ip: %s, bindAddress: %s, src: %s, dst: %s\n", id, m.IP, currentBindAddress, m.Src, m.Dst)
+		log.Printf("%s_%d, start job. ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
 		// r := rand.Intn(20)
 		// time.Sleep(time.Duration(r) * time.Second)
-		err := remote.StartSCPSimple(m.IP, currentBindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
+		err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
 		if err != nil {
-			log.Printf("Worker_%d, Move file error: %s", id, err)
+			log.Printf("%s_%d, Move file error: %s", bindAddress, id, err)
 		}
-		log.Printf("Network interface: %d, finish job. ip: %s, bindAddress: %s, src: %s, dst: %s, sleep %d second\n", id, m.IP, currentBindAddress, m.Src, m.Dst, interval)
+		log.Printf("%s_%d, finish job. ip: %s, src: %s, dst: %s, sleep %d second\n", bindAddress, id, m.IP, m.Src, m.Dst, interval)
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
