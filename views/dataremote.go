@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/spf13/viper"
 )
 
 func fetchRemotePlots() []string {
@@ -13,7 +15,9 @@ func fetchRemotePlots() []string {
 
 func fetchFromHttp(uri string) []string {
 	res := []string{}
-	url := fmt.Sprintf("%s/%s", "http://localhost:5678", uri)
+	host := viper.GetString("status.host")
+	port := viper.GetString("status.port")
+	url := fmt.Sprintf("http://%s:%s/%s", host, port, uri)
 	response, err := http.Get(url)
 	if err != nil {
 		return []string{"Not found"}
