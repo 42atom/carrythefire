@@ -1,21 +1,17 @@
 interval: 120 #每完成一轮（所有机器）后，间隔（休息）秒数
-worker: 2 #并行执行的任务数
-bindAddress: #需要绑定网卡的IP。如果只有一张网卡，请注释掉此配置
-  - 192.168.1.103
-  - 192.168.1.104
+worker: 2 #并行执行的任务数，超过8时，默认为8
 host:
   username: chiadmin #远程机器的登陆用户名
   keypath: /path/to/local/user/.ssh/id_rsa #本机私钥的绝对地址
-machines:
-  - ip: 192.168.33.7 #远程机器ip
-    src: /mnt/ssd #远程机器plot文件目录
-    dst: /path/to/local/dst #本地硬盘目录
-  - ip: 192.168.33.8 #远程机器ip
-    src: /mnt/ssd #远程机器plot文件目录
-    dst: /path/to/local/dst #本地硬盘目录
-  - ip: 192.168.33.9 #远程机器ip
-    src: /mnt/ssd #远程机器plot文件目录
-    dst: /path/to/local/dst #本地硬盘目录
-  - ip: 192.168.33.10 #远程机器ip
-    src: /mnt/ssd #远程机器plot文件目录
-    dst: /path/to/local/dst #本地硬盘目录
+targets:
+  - bindAddress: 192.168.1.103 #绑定网卡的ip地址，如果只有一张网卡请填写为空
+    machines:
+      - ip: 192.168.33.7 #远程机器ip
+        src: /mnt/ssd #远程机器plot文件目录
+        dst: /path/to/local/dst #本地硬盘目录
+      - ip: 192.168.33.8 #远程机器ip
+        src: /mnt/ssd #远程机器plot文件目录
+        dst: /path/to/local/dst #本地硬盘目录
+      - ip: 192.168.33.9 #远程机器ip
+        src: /mnt/ssd #远程机器plot文件目录
+        dst: /path/to/local/dst #本地硬盘目录
