@@ -56,8 +56,10 @@ func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath 
 	machine := make(chan *MachineCfg, carrierWorker)
 
 	//Start worker
+	workerMap := map[string]bool{}
+	mutex := &sync.Mutex{}
 	for i := 0; i < carrierWorker; i++ {
-		go worker(i, bindAddress, hostName, keyPath, interval, machine, carrierWorker)
+		go worker(i, bindAddress, hostName, keyPath, interval, machine, carrierWorker, workerMap, mutex)
 	}
 
 	for {
@@ -69,10 +71,16 @@ func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath 
 	}
 }
 
-func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int) {
+func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int, workerMap map[string]bool, mutex *sync.Mutex) {
 	log.Printf("BindAddress %s, start worker: %d\n", bindAddress, id)
 	for m := range machine {
+		if v, ok := workerMap[m.IP]; ok && v {
+			log.Printf("%s_%d, already exists, skip ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
+			time.Sleep(time.Duration(interval) * time.Second)
+			continue
+		}
 		log.Printf("%s_%d, start job. ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
+		workerMap[m.IP] = true
 		// r := rand.Intn(20)
 		// time.Sleep(time.Duration(r) * time.Second)
 		err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
@@ -81,5 +89,8 @@ func worker(id int, bindAddress, hostname, keypath string, interval int, machine
 		}
 		log.Printf("%s_%d, finish job. ip: %s, src: %s, dst: %s, sleep %d second\n", bindAddress, id, m.IP, m.Src, m.Dst, interval)
 		time.Sleep(time.Duration(interval) * time.Second)
+		mutex.Lock()
+		delete(workerMap, m.IP)
+		mutex.Unlock()
 	}
 }
