@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 	"log"
-	"math/rand"
+	"plotcarrier/remote"
 	"sync"
 	"time"
 
@@ -84,12 +84,12 @@ func worker(id int, bindAddress, hostname, keypath string, interval int, machine
 			continue
 		}
 		log.Printf("%s_%d, start job. ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
-		r := rand.Intn(20)
-		time.Sleep(time.Duration(r) * time.Second)
-		// err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
-		// if err != nil {
-		// 	log.Printf("%s_%d, Move file error: %s", bindAddress, id, err)
-		// }
+		// r := rand.Intn(20)
+		// time.Sleep(time.Duration(r) * time.Second)
+		err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
+		if err != nil {
+			log.Printf("%s_%d, Move file error: %s", bindAddress, id, err)
+		}
 		log.Printf("%s_%d, finish job. ip: %s, src: %s, dst: %s, sleep %d second\n", bindAddress, id, m.IP, m.Src, m.Dst, interval)
 		time.Sleep(time.Duration(interval) * time.Second)
 		mutex.Lock()
