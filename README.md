@@ -15,14 +15,14 @@ plot-carrier init
 复制源盘到目标盘
 
 ```
-plot-carrier remote --config plot-carrier.yaml
+plot-carrier remote --config /path/to/plot-carrier.yaml
 ```
 `--config` 配置文件路径
 
 ## 后台运行
 
 ```
-nohup ./plot-carrier remote --config plot-carrier.yaml > plotcarrier.log &
+nohup ./plot-carrier remote --config /path/to/plot-carrier.yaml > plotcarrier.log &
 ```
 
 `plotcarrier.log` 指定输出日志文件
@@ -38,4 +38,10 @@ pkill plot-carrier
 
 ```
 plot-carrier --version
+```
+
+## 查看状态
+
+```
+plot-carrier status --config /path/to/plot-carrier.yaml
 ```
