@@ -35,7 +35,6 @@ func fetchProcess(plotsMap map[string]map[string]int64, machineCfgs []*app.Machi
 				p.percent = 0
 			} else {
 				percent := float64(finfo.Size()) / float64(totalSize)
-				fmt.Println(percent)
 				p.percent = uint(percent * 100)
 			}
 
