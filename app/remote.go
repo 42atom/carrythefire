@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 	"log"
-	"plotcarrier/remote"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -74,21 +74,22 @@ func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath 
 func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int, workerMap map[string]bool, mutex *sync.RWMutex) {
 	log.Printf("BindAddress %s, start worker: %d\n", bindAddress, id)
 	for m := range machine {
-		if v, ok := workerMap[m.IP]; ok && v {
+		mutex.Lock()
+		ipExists := workerMap[m.IP]
+		workerMap[m.IP] = true
+		mutex.Unlock()
+		if ipExists {
 			log.Printf("%s_%d, already exists, skip ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
 			time.Sleep(time.Duration(interval) * time.Second)
 			continue
 		}
 		log.Printf("%s_%d, start job. ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
-		mutex.RLock()
-		workerMap[m.IP] = true
-		mutex.RUnlock()
-		// r := rand.Intn(20)
-		// time.Sleep(time.Duration(r) * time.Second)
-		err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
-		if err != nil {
-			log.Printf("%s_%d, Move file error: %s", bindAddress, id, err)
-		}
+		r := rand.Intn(20)
+		time.Sleep(time.Duration(r) * time.Second)
+		// err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
+		// if err != nil {
+		// 	log.Printf("%s_%d, Move file error: %s", bindAddress, id, err)
+		// }
 		log.Printf("%s_%d, finish job. ip: %s, src: %s, dst: %s, sleep %d second\n", bindAddress, id, m.IP, m.Src, m.Dst, interval)
 		time.Sleep(time.Duration(interval) * time.Second)
 		mutex.Lock()
