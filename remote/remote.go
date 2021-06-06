@@ -60,6 +60,7 @@ func StartSCPSimple(ip, bindAddress, src, dst, hostUsername, hostKeypath string,
 
 	if len(plots) == 0 {
 		log.Printf("There are no plots on %s, %s", ip, src)
+		return nil
 	}
 	//Change to slice
 	pp := []*Task{}

@@ -34,7 +34,7 @@ func RemoteStart() error {
 	}
 	interval := viper.GetInt("interval")
 
-	var wg *sync.WaitGroup
+	var wg sync.WaitGroup
 	carrierWorker := viper.GetInt("worker")
 	for _, v := range targets {
 		wg.Add(1)
