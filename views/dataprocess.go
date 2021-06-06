@@ -34,7 +34,9 @@ func fetchProcess(plotsMap map[string]map[string]int64, machineCfgs []*app.Machi
 				p.fileName = fmt.Sprintf("error: %s, %s", p.fileName, err)
 				p.percent = 0
 			} else {
-				p.percent = (uint(finfo.Size()) / uint(totalSize)) * 100
+				percent := float64(finfo.Size()) / float64(totalSize)
+				fmt.Println(percent)
+				p.percent = uint(percent * 100)
 			}
 
 			processes = append(processes, p)

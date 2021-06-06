@@ -105,8 +105,7 @@ func (v *View) Update(hostName, keyPath string, machineCfgs []*app.MachineCfg) {
 	v.DiskUage.Rows = fetchDisk(machineCfgs)
 	v.Process.Rows = fetchProcess(plotsMap, machineCfgs)
 
-	//remoteUpdateInterval := 3 * time.Minute
-	remoteUpdateInterval := 3 * time.Second
+	remoteUpdateInterval := 1 * time.Minute
 	go func() {
 		for range time.NewTicker(remoteUpdateInterval).C {
 			//Fetch remote plots
