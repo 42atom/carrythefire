@@ -39,18 +39,22 @@ func Run() {
 
 	ui.Render(grid)
 	uiEvents := ui.PollEvents()
+	drawTicker := time.NewTicker(time.Second).C
 	for {
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return
-		case "<Resize>":
-			payload := e.Payload.(ui.Resize)
-			grid.SetRect(0, 0, payload.Width, payload.Height)
-			ui.Clear()
+		select {
+		case e := <-uiEvents:
+			switch e.ID {
+			case "q", "<C-c>":
+				return
+			case "<Resize>":
+				payload := e.Payload.(ui.Resize)
+				grid.SetRect(0, 0, payload.Width, payload.Height)
+				ui.Clear()
+				ui.Render(grid)
+			}
+		case <-drawTicker:
 			ui.Render(grid)
 		}
-		ui.Render(grid)
 	}
 }
 
