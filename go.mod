@@ -6,6 +6,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
 	github.com/bramvdbogaerde/go-scp v0.0.0-20210527193300-acf430e39785
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/gizak/termui/v3 v3.1.0
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
