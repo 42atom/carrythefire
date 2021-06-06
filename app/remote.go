@@ -57,7 +57,7 @@ func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath 
 
 	//Start worker
 	workerMap := map[string]bool{}
-	mutex := &sync.Mutex{}
+	mutex := &sync.RWMutex{}
 	for i := 0; i < carrierWorker; i++ {
 		go worker(i, bindAddress, hostName, keyPath, interval, machine, carrierWorker, workerMap, mutex)
 	}
@@ -71,7 +71,7 @@ func distributeByBindAddress(cfgs []*MachineCfg, bindAddress, hostName, keyPath 
 	}
 }
 
-func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int, workerMap map[string]bool, mutex *sync.Mutex) {
+func worker(id int, bindAddress, hostname, keypath string, interval int, machine <-chan *MachineCfg, carrierWorker int, workerMap map[string]bool, mutex *sync.RWMutex) {
 	log.Printf("BindAddress %s, start worker: %d\n", bindAddress, id)
 	for m := range machine {
 		if v, ok := workerMap[m.IP]; ok && v {
@@ -80,7 +80,9 @@ func worker(id int, bindAddress, hostname, keypath string, interval int, machine
 			continue
 		}
 		log.Printf("%s_%d, start job. ip: %s, src: %s, dst: %s\n", bindAddress, id, m.IP, m.Src, m.Dst)
+		mutex.RLock()
 		workerMap[m.IP] = true
+		mutex.RUnlock()
 		// r := rand.Intn(20)
 		// time.Sleep(time.Duration(r) * time.Second)
 		err := remote.StartSCPSimple(m.IP, bindAddress, m.Src, m.Dst, hostname, keypath, carrierWorker)
