@@ -61,7 +61,7 @@ func simpleCopy(ip, hostUsername, bindAddress, src, filename, dst string, size i
 	if bindAddress != "" {
 		cmd = exec.Command("scp", "-o", fmt.Sprintf("BindAddress=%s", bindAddress), args, dst)
 	}
-	fmt.Println(cmd.String())
+	//fmt.Println(cmd.String())
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err = cmd.Run()

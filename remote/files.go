@@ -72,9 +72,8 @@ func copy(sshClient *ssh.Client, src, filename, dst string, size int64) (int64, 
 		return 0, nil
 	}
 
-	//Creat dst folder if not exists
+	//Return, if dst folder isn't exists
 	if _, err := os.Stat(dst); os.IsNotExist(err) {
-		err := os.Mkdir(dst, 0777)
 		if err != nil {
 			return 0, err
 		}
